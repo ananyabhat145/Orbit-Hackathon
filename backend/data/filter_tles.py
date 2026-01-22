@@ -4,7 +4,7 @@ INPUT_FILE = "all_tles.txt"
 OUTPUT_FILE = "sample_tles.txt"
 TARGET_OBJECTS = 400               
 
-# Use latin1 encoding to avoid UnicodeDecodeError
+# Read file safely
 with open(INPUT_FILE, "r", encoding="latin1") as f:
     lines = f.readlines()
 
@@ -16,7 +16,7 @@ print("Total objects:", len(objects))
 # Randomly sample objects
 sampled = random.sample(objects, TARGET_OBJECTS)
 
-# Use the same encoding when writing
+# Write output safely
 with open(OUTPUT_FILE, "w", encoding="latin1") as f:
     for obj in sampled:
         f.writelines(obj)
