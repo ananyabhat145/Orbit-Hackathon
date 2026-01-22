@@ -1,24 +1,18 @@
-import numpy as np
-from datetime import timedelta
-
-
-def propagate_satellite(satrec, start_time, minutes_ahead=1440, step=10):
+def propagate_satellite(position, velocity, minutes_ahead):
     """
-    Returns positions over time in km.
+    Simple two-body propagation.
+    position: [x, y, z] km
+    velocity: [vx, vy, vz] km/s
     """
-    positions = []
+    dt = 60  # seconds
+    steps = minutes_ahead
 
-    for t in range(0, minutes_ahead, step):
-        future_time = start_time + timedelta(minutes=t)
-        jd, fr = satrec.jdsatepoch, satrec.jdsatepochF + (t / 1440.0)
+    traj = []
+    r = np.array(position, dtype=float)
+    v = np.array(velocity, dtype=float)
 
-        e, r, v = satrec.sgp4(jd, fr)
+    for i in range(steps):
+        r = r + v * dt
+        traj.append(r.tolist())
 
-        if e == 0:
-            positions.append({
-                "t": t,
-                "pos": np.array(r)
-            })
-
-    return positions
-
+    return traj
