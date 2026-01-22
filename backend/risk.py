@@ -1,13 +1,13 @@
 import numpy as np
 
-# Distance (km) under which we consider a potential collision
-COLLISION_DISTANCE_KM = 1.0
+# Conjunction screening threshold (km)
+CONJUNCTION_DISTANCE_KM = 10.0
 
 
 def collision_probability(traj_a, traj_b, samples=300):
     """
-    Monte Carlo estimate of collision probability between two trajectories.
-    traj_a / traj_b: lists of (x, y, z) positions in km
+    Estimates relative conjunction likelihood between two trajectories.
+    This is NOT a true physical collision probability.
     """
     if not traj_a or not traj_b:
         return 0.0
@@ -23,19 +23,13 @@ def collision_probability(traj_a, traj_b, samples=300):
 
         distance = np.linalg.norm(pa - pb)
 
-        if distance < COLLISION_DISTANCE_KM:
+        if distance < CONJUNCTION_DISTANCE_KM:
             hits += 1
 
     return hits / samples
 
 
 def total_risk(target, all_objects):
-    """
-    Computes total collision risk for one satellite against all others.
-
-    target: {"name": str, "traj": list}
-    all_objects: list of same dicts
-    """
     risks = []
 
     for other in all_objects:
@@ -50,7 +44,6 @@ def total_risk(target, all_objects):
                 "probability": round(p, 6)
             })
 
-    # Sort highest risk first
     risks.sort(key=lambda x: x["probability"], reverse=True)
 
     total_score = round(sum(r["probability"] for r in risks), 6)
