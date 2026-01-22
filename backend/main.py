@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from propagate import propagate_satellite
 from risk import total_risk
 from explain import explain_risk
-from satellites_data import satellites  # your manual satellite list
+from satellites_data import satellites 
 
 app = FastAPI(title="Debrismap Risk API")
 
@@ -10,7 +10,12 @@ app = FastAPI(title="Debrismap Risk API")
 TRAJECTORIES = []
 
 for sat in satellites:
-    # Update propagate_satellite to accept manual parameters
+    # Compute trajectory for each satellite
+    traj = propagate_satellite(
+        sat["satrec"],
+        sat["epoch"],
+        minutes_ahead=1440  # 1 day ahead
+    )
     TRAJECTORIES.append({
         "name": sat["name"],
         "traj": traj
@@ -32,5 +37,3 @@ def risk_endpoint(sat_id: int):
         "top_threats": threats,
         "explanation": explanation
     }
-
-
