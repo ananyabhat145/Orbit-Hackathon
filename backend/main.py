@@ -1,20 +1,20 @@
 from fastapi import FastAPI
-from tle_loader import load_tles
 from propagate import propagate_satellite
 from risk import total_risk
 from explain import explain_risk
+from satellites_data import satellites  # your manual satellite list
 
 app = FastAPI(title="Debrismap Risk API")
-
-TLES = load_tles("data/sample_tles.txt")
 
 # Precompute trajectories once at startup
 TRAJECTORIES = []
 
-for sat in TLES:
+for sat in satellites:
+    # Update propagate_satellite to accept manual parameters
     traj = propagate_satellite(
-        sat["satrec"],
-        sat["epoch"],
+        perigee_km=sat["perigee_km"],
+        apogee_km=sat["apogee_km"],
+        inclination_deg=sat["inclination_deg"],
         minutes_ahead=1440
     )
     TRAJECTORIES.append({
@@ -38,4 +38,5 @@ def risk_endpoint(sat_id: int):
         "top_threats": threats,
         "explanation": explanation
     }
+
 
