@@ -35,3 +35,9 @@ def preload_trajectories():
         })
 
     print(f"[Debrismap] Loaded {len(TRAJECTORIES)} trajectories")
+@app.get("/")
+def root():
+    return {
+        "status": "Debrismap API is live 🚀",
+        "satellites_loaded": len(TRAJECTORIES)
+    }
