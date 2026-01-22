@@ -11,12 +11,6 @@ TRAJECTORIES = []
 
 for sat in satellites:
     # Update propagate_satellite to accept manual parameters
-    traj = propagate_satellite(
-        perigee_km=sat["perigee_km"],
-        apogee_km=sat["apogee_km"],
-        inclination_deg=sat["inclination_deg"],
-        minutes_ahead=1440
-    )
     TRAJECTORIES.append({
         "name": sat["name"],
         "traj": traj
