@@ -6,24 +6,22 @@ from satellites_data import satellites
 
 app = FastAPI(title="Debrismap Risk API")
 
-# In-memory cache
 TRAJECTORIES = []
 
 
 @app.on_event("startup")
 def preload_trajectories():
     """
-    Precompute satellite trajectories once at startup.
-    Prevents recomputation on every request.
+    Precompute trajectories using manually defined state vectors.
     """
     global TRAJECTORIES
     TRAJECTORIES = []
 
     for sat in satellites:
         traj = propagate_satellite(
-            sat["satrec"],
-            sat["epoch"],
-            minutes_ahead=1440  # 24 hours
+            position=sat["position"],
+            velocity=sat["velocity"],
+            minutes_ahead=1440
         )
 
         TRAJECTORIES.append({
@@ -36,9 +34,6 @@ def preload_trajectories():
 
 @app.get("/satellites")
 def list_satellites():
-    """
-    Allows users to discover valid satellite IDs.
-    """
     return [
         {"id": i, "name": t["name"]}
         for i, t in enumerate(TRAJECTORIES)
@@ -47,15 +42,11 @@ def list_satellites():
 
 @app.get("/risk/{sat_id}")
 def risk_endpoint(sat_id: int):
-    """
-    Compute collision risk for a given satellite ID.
-    """
     if sat_id < 0 or sat_id >= len(TRAJECTORIES):
         raise HTTPException(status_code=404, detail="Satellite not found")
 
     target = TRAJECTORIES[sat_id]
 
-    # Exclude self from risk calculation
     others = [
         t for i, t in enumerate(TRAJECTORIES)
         if i != sat_id
